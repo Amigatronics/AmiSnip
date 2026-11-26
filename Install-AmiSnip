@@ -1,0 +1,79 @@
+; $VER: Install-AmiSnip 1.3 (22.11.2026)
+; Installer script for AmiSnip - by Amigatronics
+
+(set @app-name "AmiSnip")
+
+(message
+  "\nAmiSnip 1.3\n\n"
+  "Capture any area of the screen with the mouse,\n"
+  "like Win+Shift+S on Windows.\n\n"
+  "This installs the AmiSnip commodity and its\n"
+  "preferences editor (SYS:Prefs/AmiSnipPrefs).\n\n"
+  "If AmiSnip 1.0 is running, quit it first from Exchange.\n\n"
+  "by Amigatronics - https://amigatronics.com"
+)
+
+(set #where
+  (askchoice
+    (prompt "Where do you want to install the AmiSnip commodity?")
+    (help "SYS:WBStartup starts AmiSnip every time the Amiga boots.\n\n"
+          "SYS:Tools/Commodities lets you start it when you want.")
+    (choices "SYS:WBStartup (start automatically)"
+             "SYS:Tools/Commodities"
+             "Another drawer...")
+    (default 0)
+  )
+)
+
+(if (= #where 0) (set #dest "SYS:WBStartup"))
+(if (= #where 1) (set #dest "SYS:Tools/Commodities"))
+(if (= #where 2)
+  (set #dest
+    (askdir
+      (prompt "Choose the drawer for AmiSnip")
+      (help @askdir-help)
+      (default "SYS:Tools/Commodities")
+    )
+  )
+)
+
+; stop a running AmiSnip 1.1 (if any) before replacing it
+(run "AmiSnip QUIT")
+
+(copyfiles
+  (prompt "Installing the AmiSnip commodity")
+  (help @copyfiles-help)
+  (source "AmiSnip")
+  (dest #dest)
+  (infos)
+  (noposition)
+)
+(complete 50)
+
+(copyfiles
+  (prompt "Installing the AmiSnip preferences editor")
+  (help @copyfiles-help)
+  (source "AmiSnipPrefs")
+  (dest "SYS:Prefs")
+  (infos)
+  (noposition)
+)
+(complete 90)
+
+(if
+  (askbool
+    (prompt "Do you want to start AmiSnip now?")
+    (help "AmiSnip runs in the background. Press LAmiga+Shift+S to capture.")
+    (default 1)
+  )
+  (run (cat "Run >NIL: \"" (tackon #dest "AmiSnip") "\""))
+)
+(complete 100)
+
+(exit
+  "AmiSnip 1.3 is installed.\n\n"
+  "Press LAmiga+Shift+S to capture an area of the screen.\n\n"
+  "Change the settings with SYS:Prefs/AmiSnipPrefs,\n"
+  "or with \"Show\" in Exchange.\n\n"
+  "by Amigatronics"
+)
